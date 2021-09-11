@@ -3,20 +3,6 @@
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
-  "eslint.validate": [
-    {
-      "language": "vue",
-      "autoFix": true
-    },
-    {
-      "language": "html",
-      "autoFix": true
-    },
-    {
-      "language": "javascript",
-      "autoFix": true
-    }
-  ],
   "env": {
     "browser": true,
     "es6": true

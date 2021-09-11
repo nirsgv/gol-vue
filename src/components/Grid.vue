@@ -1,21 +1,21 @@
 <template>
-<div>
   <div>
-    <input type="number" v-model.number="rows" @change="somefunction">
-    <input type="number" v-model.number="columns" @change="somefunction">
+    <div>
+      <input type="number" v-model.number="rows" @change="setTable" />
+      <input type="number" v-model.number="columns" @change="setTable" />
+    </div>
+    <div class="grid">
+      <ul>
+        <Cell
+          v-for="(item, index) in this.table"
+          v-bind:on="Boolean(item)"
+          class="cell"
+          :key="`${index} ${item}`"
+          >{{ item }}</Cell
+        >
+      </ul>
+    </div>
   </div>
-  <div class="grid">
-    <ul v-for="(row, index) in table" :key="index">
-      <Cell
-        v-bind:on="Boolean(item2)"
-        class="cell"
-        v-for="(item2, index2) in table[index]"
-        :key="`${index} ${index2}`"
-        >{{ item2 }}</Cell
-      >
-    </ul>
-  </div>
-</div>
 </template>
 
 <script>
@@ -31,62 +31,67 @@ export default {
       rows: 30,
       columns: 30,
       intervalId: null,
-      table: this.generateGrid(this.rows || 30, this.columns || 30)
+      table: this.generateGrid(this.rows || 30, this.columns || 30),
     };
   },
-  computed: {
-
-  },
+  computed: {},
   methods: {
-
     log(message) {
       console.log(message);
     },
-    somefunction() {
-      this.table = this.generateGrid(this.rows,this.columns)
+    setTable() {
+      this.table = this.generateGrid(this.rows, this.columns);
+    },
+    retreiveIndexes(mapKey) {
+      return mapKey.split('|rc|')
     },
     generateGrid(
       rows,
       columns,
-      mapper = () => Boolean(Math.floor(Math.random() * 2))
+      cellInitFunc = () => Boolean(Math.floor(Math.random() * 2))
     ) {
-      return new Array(rows)
-        .fill()
-        .map(() => new Array(columns).fill().map(mapper));
+      const tableMap = {};
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < columns; c++) {
+          tableMap[`${r}|rc|${c}`] = cellInitFunc();
+        }
+      }
+      return tableMap;
     },
-    
-    countActiveNeighbours(rowIdx, colIdx, indexedGrid) {
+
+    countActiveNeighbours(rowIdx, colIdx, tableMap) {
       let count = 0;
       for (let x = -1; x <= 1; x++) {
         for (let y = -1; y <= 1; y++) {
           if (!x && !y) continue;
-          indexedGrid[rowIdx + x]?.[colIdx + y] && count++;
+          tableMap[`${rowIdx}|rc|${colIdx}`] && count++;
         }
       }
       return count;
     },
     animate(cb) {
-      return (this.intervalId = setInterval(cb, 100));
+      return (this.intervalId = setInterval(cb, 1000));
     },
     stopAnimate() {
       clearInterval(this.intervalId);
       return (this.intervalId = null);
     },
     proceed() {
-      this.table = this.table.map((row, rowIdx, arr) =>
-        row.map((value, colIdx) => {
-          const activeNeighbours = this.countActiveNeighbours(rowIdx,colIdx,arr);
-          return value
-            ? activeNeighbours === 2 || activeNeighbours === 3 // initially alive cell
-            : activeNeighbours === 3; // initially dead cell
-        })
-      );
+      const newTable = { };
+      for (let [index, val] of Object.entries(this.table)) {
+          const indexes = this.retreiveIndexes(index);
+          const activeNeighbours = this.countActiveNeighbours(...indexes,this.table)
+          newTable[index] = val
+                    ? activeNeighbours === 2 || activeNeighbours === 3 // initially alive cell
+                    : activeNeighbours === 3; // initially dead cell
+          this.table = newTable;
+      }
+          console.log(newTable)
     },
   },
   created: function() {
-    this.animate(this.proceed)
+    this.animate(this.proceed);
     this.countActiveNeighbours(10, 10, this.table);
-
   },
 };
 </script>
