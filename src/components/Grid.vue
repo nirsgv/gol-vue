@@ -4,8 +4,11 @@
       <input type="number" v-model.number="rows" @change="setTable" />
       <input type="number" v-model.number="columns" @change="setTable" />
     </div>
-    <div class="grid">
-      <ul>
+    <div>
+      <ul  class="grid" :style="{ 
+        gridTemplateColumns: `repeat(${this.columns}, 10px)`, 
+        gridTemplateRows: `repeat(${this.rows}, 10px)` }"
+      >
         <Cell
           v-for="(item, index) in this.table"
           v-bind:on="Boolean(item)"
@@ -64,13 +67,13 @@ export default {
       for (let x = -1; x <= 1; x++) {
         for (let y = -1; y <= 1; y++) {
           if (!x && !y) continue;
-          tableMap[`${rowIdx}|rc|${colIdx}`] && count++;
+          tableMap[`${Number(rowIdx) + x}|rc|${Number(colIdx) + y}`] && count++;
         }
       }
       return count;
     },
     animate(cb) {
-      return (this.intervalId = setInterval(cb, 1000));
+      return (this.intervalId = setInterval(cb, 60));
     },
     stopAnimate() {
       clearInterval(this.intervalId);
@@ -84,14 +87,12 @@ export default {
           newTable[index] = val
                     ? activeNeighbours === 2 || activeNeighbours === 3 // initially alive cell
                     : activeNeighbours === 3; // initially dead cell
-          this.table = newTable;
       }
-          console.log(newTable)
+      this.table = newTable;
     },
   },
   created: function() {
-    this.animate(this.proceed);
-    this.countActiveNeighbours(10, 10, this.table);
+    var x = this.animate(this.proceed);
   },
 };
 </script>
@@ -99,6 +100,10 @@ export default {
 <style>
 .grid {
   font-size: 0;
+  display: grid;
+  grid-template-rows: repeat(30, 10px);
+  grid-template-columns: repeat(30, 10px);
+
 }
 ul {
   list-style: none;
