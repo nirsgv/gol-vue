@@ -11,10 +11,10 @@
       >
         <Cell
           v-for="(item, index) in this.table"
-          v-bind:on="Boolean(item)"
+          v-bind:on="item"
           class="cell"
-          :key="`${index} ${item}`"
-          >{{ item }}</Cell
+          :key="index"
+          />
         >
       </ul>
     </div>
@@ -34,7 +34,7 @@ export default {
       rows: 30,
       columns: 30,
       intervalId: null,
-      table: this.generateGrid(this.rows || 30, this.columns || 30),
+      table: {},
     };
   },
   computed: {},
@@ -92,7 +92,8 @@ export default {
     },
   },
   created: function() {
-    var x = this.animate(this.proceed);
+    this.setTable();
+    this.animate(this.proceed);
   },
 };
 </script>
@@ -103,13 +104,9 @@ export default {
   display: grid;
   grid-template-rows: repeat(30, 10px);
   grid-template-columns: repeat(30, 10px);
-
 }
 ul {
   list-style: none;
-  display: block;
 }
-li {
-  display: inline-block;
-}
+
 </style>
